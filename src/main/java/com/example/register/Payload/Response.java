@@ -3,6 +3,7 @@ package com.example.register.Payload;
 import com.example.register.Dto.UserDto;
 
 public class Response {
+	
 	private UserDto user;
 	private String token;
 	private String message = "Success";

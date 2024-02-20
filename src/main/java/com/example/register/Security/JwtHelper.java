@@ -17,7 +17,7 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtHelper {
 	// requirement :
-	public static final long JWT_TOKEN_VALIDITY = 60*5;   // 1 min validity
+	public static final long JWT_TOKEN_VALIDITY = 60*5;   // 5 min validity
 
 	// public static final long JWT_TOKEN_VALIDITY = 60;
 	private String secret = "afafasfafafasfasfasfafacasdasfasxASFACASDFACASDFASFASFDAFASFASDAADSCSDFADCVSGCFVADXCcadwavfsfarvf";

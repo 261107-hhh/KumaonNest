@@ -56,13 +56,6 @@ public class User implements UserDetails {
 	@Column
 	private String address;
 
-//	@Column
-//	private String role;
-	@ManyToMany(fetch = FetchType.EAGER)
-	private Set<Role> role = new HashSet<>();
-
-//	private Set<GrantedAuthority> authorities;
-
 	@NotNull
 	@Column(columnDefinition = "boolean default false")
 	private boolean active;
@@ -72,6 +65,15 @@ public class User implements UserDetails {
 	
 	@Column
 	private String otpverify;
+	
+
+//	@Column
+//	private String role;
+	@ManyToMany(fetch = FetchType.EAGER)
+	private Set<Role> role = new HashSet<>();
+
+//	private Set<GrantedAuthority> authorities;
+
 
 //	private String verificationCode;
 

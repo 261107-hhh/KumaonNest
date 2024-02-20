@@ -6,6 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.register.Dto.UserDto;
 import com.example.register.Entity.User;
+import com.example.register.Payload.PasswordChangeRequest;
 import com.example.register.Repo.UserRepo;
 import com.example.register.Service.UserService;
 
@@ -122,7 +124,7 @@ public class HomeController {
 	}
 
 	@GetMapping("/verify/{otp}")
-	public String saveUserAfterOtpVerification(@PathVariable("otp") String otp) {
+	public ResponseEntity<String> saveUserAfterOtpVerification(@PathVariable("otp") String otp) {
 		System.out.println(otp + " OTP IS");
 		if (repo.existsByotpverify(otp)) {
 			User user = repo.getByotpverify(otp);
@@ -131,21 +133,44 @@ public class HomeController {
 			user.setOtpverify("verified");
 			repo.save(user);
 			System.out.println("Verified user");
-			return "User Verified";
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body("User Verified");
 		}
-		return "User not found Try again creating account";
-
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body("Wrong OTP");
 	}
 
-	@GetMapping("/request/newotp")
-	public String newOtp(@RequestBody String mail) {
+	@GetMapping("/request/newotp/{mail}")
+	public ResponseEntity<String> newOtp(@PathVariable("mail") String mail) {
 		System.out.println(mail + " This is mail");
 		if (repo.existsByEmail(mail)) {
 			sendMail(mail);
-			return "New otp has been send to registered mail id";
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body("Check registered mail");
 		} else {
-			return "No user found with mail id";
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+					.body("No user found with mail id");
 		}
 	}
+	
+	@PostMapping("/request/newpassword")
+	public ResponseEntity<String> newOtp(@RequestBody PasswordChangeRequest req ) {
+		String mail = req.getEmail();
+		System.out.println(req.getEmail() + " This is mail");
+		if (repo.existsByEmail(mail)) {
+			Optional<User> user = repo.getByEmail(mail);
+			if(user.get().getOtpverify().equals(req.getOtp())) {
+				userService.updatePassword(mail, req.getPassword());
+				return ResponseEntity.status(HttpStatus.CREATED)
+						.body("New password has been set");
+			}
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+					.body("Otp does not match");
+		} else {
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+					.body("No user found with mail id");
+		}
+	}
+	
 
 }

@@ -22,7 +22,8 @@ import jakarta.activation.DataSource;
 class SecurityConfig {
 
 	public static String[] PUBLIC_URL = { "/user/login", "/register/**" };
-	public static String[] PRIVATE_URL = { "/user/logout", "user/current" };
+	public static String[] PRIVATE_URL = { "user/logout", "user/current", "user/getAll", "user/get/{id}",
+			"user/update/{id}" };
 	public static String[] ROLES = { "ADMIN", "STAFF", "GUEST", };
 
 	@Autowired
@@ -34,11 +35,10 @@ class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		http.csrf((csrf) -> csrf.disable())
-		.cors((cors) -> cors.disable())
+		http.csrf((csrf) -> csrf.disable()).cors((cors) -> cors.disable())
 
-				.authorizeHttpRequests((auth) -> auth.requestMatchers(PUBLIC_URL).permitAll()
-						.requestMatchers(PRIVATE_URL).permitAll())
+				.authorizeHttpRequests(
+						(auth) -> auth.requestMatchers(PUBLIC_URL).permitAll().requestMatchers(PRIVATE_URL).permitAll())
 //				.authorizeHttpRequests((auth) -> auth.requestMatchers(PRIVATE_URL).authenticated())
 //				.authorizeHttpRequests((auth) -> auth.anyRequest().permitAll())
 //				.authorizeHttpRequests((auth) -> auth.anyRequest().hasAnyRole(ROLES))

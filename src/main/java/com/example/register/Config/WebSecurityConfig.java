@@ -53,6 +53,7 @@ class WebSecurityConfig {
 			public void addCorsMappings(CorsRegistry registry) {
 
 				registry.addMapping("/**");
+//          .allowedMethods("GET", "POST", "PUT", "DELETE","PATCH");
 //				 .allowedOrigins(cors.getAllowedOrigins())
 //	             .allowedMethods(cors.getAllowedMethods())
 //	             .maxAge(cors.getMaxAge())
@@ -64,7 +65,6 @@ class WebSecurityConfig {
 	}
 ////		  registry.addMapping("/register/createUser")
 ////          .allowedOrigins("http://localhost:3000")
-////          .allowedMethods("GET", "POST", "PUT", "DELETE")
 ////          .allowedHeaders("*")
 ////          .allowCredentials(true);
 

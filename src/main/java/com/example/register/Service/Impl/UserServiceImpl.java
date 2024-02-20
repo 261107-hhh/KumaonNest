@@ -1,11 +1,12 @@
 package com.example.register.Service.Impl;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.register.Exception.ResourceNotFoundException;
+import com.example.register.Payload.UserResponse;
 import com.example.register.Dto.UserDto;
 import com.example.register.Entity.Role;
 import com.example.register.Entity.User;
@@ -23,7 +25,6 @@ import com.example.register.Service.UserService;
 
 import jakarta.mail.internet.MimeMessage;
 
-import com.example.register.Exception.*;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -52,7 +53,7 @@ public class UserServiceImpl implements UserService {
 		User user = mapper.map(userDto, User.class);
 		String mail = user.getEmail();
 		int roleID = 3333;
-		if (mail.matches("admin@gmail.com") && userRepo.count() == 0) {
+		if ((mail.matches("admin@gmail.com") || mail.matches("himanshunainwal0@gmail.com")) && userRepo.count() == 0) {
 			roleID = 1111;
 		}
 		Role role = this.roleRepository.findById(roleID).get();
@@ -75,7 +76,7 @@ public class UserServiceImpl implements UserService {
 		// TODO Auto-generated method stub
 		if (!user.getverify()) {
 			userRepo.delete(mapper.map(user, User.class));
-				
+
 		}
 		System.out.println(user.getEmail());
 	}
@@ -84,12 +85,12 @@ public class UserServiceImpl implements UserService {
 	public void setOtp(String otp, String mail) {
 //		Update user with otp
 		int userId = userRepo.getByEmail(mail).get().getId();
-		User u = userRepo.findById(userId)
-				.orElseThrow(() -> new ResourceNotFoundException("User not found."));
+		User u = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
 		u.setOtpverify(otp);
+		u.setVerify(false);
 		this.userRepo.save(u);
 	}
-	
+
 	@Override
 	public boolean sendMail(String to, String subject, String body) {
 		try {
@@ -117,13 +118,12 @@ public class UserServiceImpl implements UserService {
 			} catch (Exception e) {
 				flag++;
 				System.out.println("Error while sending the mail or in Authentication");
-				
+
 			}
-			if(flag == 0 ) {
+			if (flag == 0) {
 				return true;
-				
-			}
-			else {
+
+			} else {
 				return false;
 			}
 
@@ -131,6 +131,36 @@ public class UserServiceImpl implements UserService {
 			throw new RuntimeException(e);
 		}
 
+	}
+
+	@Override
+	public void updatePassword(String mail, String password) {
+//		Update user with otp
+		int userId = userRepo.getByEmail(mail).get().getId();
+		User u = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
+		u.setVerify(true);
+		u.setPassword(bCryptPasswordEncoder.encode(password));
+		this.userRepo.save(u);
+	}
+
+	@Override
+	public UserResponse getAllUsers() {
+		// TODO Auto-generated method stub
+		List<User> us = userRepo.getAllUser();
+		UserResponse res = new UserResponse();
+		List<UserDto> data = us.stream().map((e) -> mapper.map(e, UserDto.class)).collect(Collectors.toList());
+		System.out.println(us);
+		res.setUsers(data);
+		return res;
+	}
+
+	@Override
+	public UserDto getUsers(int id) {
+		// TODO Auto-generated method stub
+		Optional<User> us = userRepo.getById(id);
+		UserDto ud = mapper.map(us, UserDto.class);
+		System.out.println(us);
+		return ud ;
 	}
 
 //	@Override
@@ -183,7 +213,7 @@ public class UserServiceImpl implements UserService {
 ////
 ////		}
 ////	}
-//
+//7070022222
 ////	private boolean send(String to, String from, String msg, String subject) {
 ////		// TODO Auto-generated method stub
 ////		boolean flag = false;

@@ -1,11 +1,7 @@
-package com.example.register.Dto;
+package com.example.register.Payload;
 
-import java.util.HashSet;
-import java.util.Set;
+public class UserUpdateRequest {
 
-public class UserDto {
-
-	private int id;
 	private String name;
 	private String email;
 	private String password;
@@ -13,34 +9,41 @@ public class UserDto {
 	private String address;
 	private boolean active;
 	private boolean verify;
-	private Set<RoleDto> role = new HashSet<>();
-//	private String otpVerify;
+	private String role;
 
-	public UserDto() {
+	public UserUpdateRequest() {
 		super();
+		// TODO Auto-generated constructor stub
 	}
 
-	public UserDto(int id, String name, String email, String password, String phone, String address,
-			Set<com.example.register.Dto.RoleDto> role, boolean active, boolean verify) {
+	public UserUpdateRequest(String name, String email, String password, String phone, String address, boolean active,
+			boolean verify, String role) {
 		super();
-		this.id = id;
 		this.name = name;
 		this.email = email;
 		this.password = password;
 		this.phone = phone;
 		this.address = address;
-		this.role = role;
 		this.active = active;
 		this.verify = verify;
-//		this.otpVerify = otpVerify;
+		this.role = role;
 	}
 
-	public int getId() {
-		return id;
+
+	public String getPhone() {
+		return phone;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
 	}
 
 	public String getName() {
@@ -67,14 +70,6 @@ public class UserDto {
 		this.password = password;
 	}
 
-	public String getPhone() {
-		return phone;
-	}
-
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-
 	public String getAddress() {
 		return address;
 	}
@@ -91,19 +86,7 @@ public class UserDto {
 		this.active = active;
 	}
 
-	public Set<RoleDto> getRole() {
-		return role;
-	}
-
-	public void setRole(Set<RoleDto> role) {
-		this.role = role;
-	}
-
 	public boolean isVerify() {
-		return verify;
-	}
-
-	public boolean getverify() {
 		return verify;
 	}
 
@@ -111,13 +94,4 @@ public class UserDto {
 		this.verify = verify;
 	}
 
-//	public String getOtpVerify() {
-//		return otpVerify;
-//	}
-//
-//	public void setOtpVerify(String otpVerify) {
-//		this.otpVerify = otpVerify;
-//	}
-
-	
 }
