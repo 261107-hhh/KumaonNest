@@ -9,25 +9,20 @@ import jakarta.validation.constraints.Size;
 public class SignupRequest {
 	
 	@NotBlank
-	@Size(min = 3, max = 20)
-	private String username;
-
-
-	private Set<String> role;
+	@Size(min = 11, max = 50)
+	private String email;
 
 	@NotBlank
-	@Size(min = 6, max = 40)
+	@Size(min = 8, max = 50)
 	private String password;
 
-	public String getUsername() {
-		return username;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
+	public void setEmail(String email) {
+		this.email = email;
 	}
-
-	
 
 	public String getPassword() {
 		return password;
@@ -37,11 +32,4 @@ public class SignupRequest {
 		this.password = password;
 	}
 
-	public Set<String> getRole() {
-		return this.role;
-	}
-
-	public void setRole(Set<String> role) {
-		this.role = role;
-	}
 }
