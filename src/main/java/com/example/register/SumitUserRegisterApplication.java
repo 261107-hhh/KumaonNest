@@ -16,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @SpringBootApplication
 //(exclude = SecurityAutoConfiguration.class)
-public class SumitUserRegisterApplication  implements CommandLineRunner{
+public class SumitUserRegisterApplication  
+//implements CommandLineRunner
+{
 
 	@Autowired
 	private RoleRepository roleRepository;
@@ -29,37 +31,38 @@ public class SumitUserRegisterApplication  implements CommandLineRunner{
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
 	}
-	
-	public void run(String... args) throws Exception {
-		try {
-			Role role0=new Role();
-			role0.setId(1111);
-			role0.setName("ROLE_ADMIN");
-			
-			Role role1=new Role();
-			role1.setId(2222);
-			role1.setName("ROLE_STAFF");
-			
-			
-			Role role2=new Role();
-			role2.setId(3333);
-			role2.setName("ROLE_GUEST");
-			
-			List<Role> role=new ArrayList<>();
-			  role.add(role0);
-			  role.add(role1);
-			  role.add(role2);
-			 this.roleRepository.saveAll(role);
-			  
 
-			
-		}catch(Exception e) {
-			
-			System.out.println("User already exist");
-			e.printStackTrace();
-			
-		}
-	}
+	
+//	public void run(String... args) throws Exception {
+//		try {
+//			Role role0=new Role();
+//			role0.setId(1111);
+//			role0.setName("ROLE_ADMIN");
+//			
+//			Role role1=new Role();
+//			role1.setId(2222);
+//			role1.setName("ROLE_STAFF");
+//			
+//			
+//			Role role2=new Role();
+//			role2.setId(3333);
+//			role2.setName("ROLE_GUEST");
+//			
+//			List<Role> role=new ArrayList<>();
+//			  role.add(role0);
+//			  role.add(role1);
+//			  role.add(role2);
+//			 this.roleRepository.saveAll(role);
+//			  
+//
+//			
+//		}catch(Exception e) {
+//			
+//			System.out.println("User already exist");
+//			e.printStackTrace();
+//			
+//		}
+//	}
 
 
 }

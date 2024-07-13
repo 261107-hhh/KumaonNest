@@ -1,21 +1,14 @@
 package com.example.register.Entity;
 
-import java.util.Arrays;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,33 +16,33 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity
-@Table(name = "user")
-public class User implements UserDetails {
+public class User implements UserDetails, Serializable {
 
 	@Id
-//	@Column(name = "userId")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int id;
+	private Long id;
+	
+	private String username;
 
-//	@Column(name = "userName")
-	private String name;
-
-	@Column(unique = true)
-	@NotNull
-	@Email(message = "Can not be duplicate")
+	@NotBlank
+	@Size(max = 50)
+	@Email(message = "Email should be valid")
 	private String email;
 
-	@Size(min = 8)
-	@NotNull
-	@Column
+	@NotBlank
+	@Size(min = 8, max = 225)
 	private String password;
 
-	@Size(min = 10, max = 10, message = "Can not be duplicate")
-	@NotNull
+	@Size(min = 10, max = 10, message = "Can 3not be duplicate")
 	@Column(unique = true)
 	private String phone;
 
@@ -62,57 +55,28 @@ public class User implements UserDetails {
 
 	@Column(columnDefinition = "boolean default false")
 	private boolean verify;
-	
+
 	@Column
 	private String otpverify;
-	
 
-//	@Column
-//	private String role;
 	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> role = new HashSet<>();
-
-//	private Set<GrantedAuthority> authorities;
-
-
-//	private String verificationCode;
-
-	public User() {
-		super();
-	}
-
-	public User(int id, String name, @NotNull @Email(message = "Can not be duplicate") String email,
-		@Size(min = 8) @NotNull String password,
-		@Size(min = 10, max = 10, message = "Can not be duplicate") @NotNull String phone, String address,
-		Set<Role> role, @NotNull boolean active, boolean verify, String otpverify) {
-	super();
-	this.id = id;
-	this.name = name;
-	this.email = email;
-	this.password = password;
-	this.phone = phone;
-	this.address = address;
-	this.role = role;
-	this.active = active;
-	this.verify = verify;
-	this.otpverify = otpverify;
-}
-
-
-	public int getId() {
+	
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
-	public String getName() {
-		return name;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	public String getEmail() {
@@ -147,18 +111,6 @@ public class User implements UserDetails {
 		this.address = address;
 	}
 
-	public Set<Role> getRole() {
-		return role;
-	}
-
-
-
-	public void setRole(Set<Role> role) {
-		this.role = role;
-	}
-
-
-
 	public boolean isActive() {
 		return active;
 	}
@@ -174,7 +126,7 @@ public class User implements UserDetails {
 	public void setVerify(boolean verify) {
 		this.verify = verify;
 	}
-	
+
 	public String getOtpverify() {
 		return otpverify;
 	}
@@ -183,45 +135,49 @@ public class User implements UserDetails {
 		this.otpverify = otpverify;
 	}
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-//		List<SimpleGrantedAuthority> collect = this.roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+	public Set<Role> getRoles() {
+		return role;
+	}
 
-//		return collect;
-//		SimpleGrantedAuthority auth = new SimpleGrantedAuthority(this.getRole());
-//		return Arrays.asList(auth);
-		
-		List<SimpleGrantedAuthority> auth = role.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
-		return auth;
+	public void setRoles(Set<Role> role) {
+		this.role = role;
+	}
+
+	public User() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public User(@NotBlank @Size(max = 50) @Email(message = "Email should be valid") String email,
+			@NotBlank @Size(min = 8, max = 225) String password) {
+		super();
+		this.email = email;
+		this.password = password;
 	}
 
 	@Override
-	public String getUsername() {
-		// TODO Auto-generated method stub
-		return this.getEmail();
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return role.stream().map(role -> new SimpleGrantedAuthority(role.getName().name()))
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public boolean isAccountNonExpired() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
 	@Override
 	public boolean isAccountNonLocked() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
 	@Override
 	public boolean isCredentialsNonExpired() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
 	@Override
 	public boolean isEnabled() {
-		// TODO Auto-generated method stub
 		return true;
 	}
 

@@ -1,7 +1,12 @@
 package com.example.register.Service.Impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -16,15 +21,15 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.register.Exception.ResourceNotFoundException;
 import com.example.register.Payload.UserResponse;
+import com.example.register.Payload.UserUpdateRequest;
 import com.example.register.Dto.UserDto;
 import com.example.register.Entity.Role;
 import com.example.register.Entity.User;
 import com.example.register.Repo.RoleRepository;
-import com.example.register.Repo.UserRepo;
+import com.example.register.Repo.UserRepository;
 import com.example.register.Service.UserService;
 
 import jakarta.mail.internet.MimeMessage;
-
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -36,7 +41,7 @@ public class UserServiceImpl implements UserService {
 	private JavaMailSender javaMailSender;
 
 	@Autowired
-	private UserRepo userRepo;
+	private UserRepository userRepository;
 
 	@Autowired
 	public BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -52,43 +57,71 @@ public class UserServiceImpl implements UserService {
 		// TODO Auto-generated method stub
 		User user = mapper.map(userDto, User.class);
 		String mail = user.getEmail();
-		int roleID = 3333;
-		if ((mail.matches("admin@gmail.com") || mail.matches("himanshunainwal0@gmail.com")) && userRepo.count() == 0) {
-			roleID = 1111;
+		Long roleID = 3333l;
+//		&& userRepo.count() == 0
+		if ((mail.matches("kumaunretailstore@gmail.com") || mail.matches("himanshunainwal0@gmail.com"))) {
+			roleID = 1111l;
+		} else if (mail.contains("kumaunretailstore") || mail.contains("wal66")) {
+			roleID = 2222l;
 		}
 		Role role = this.roleRepository.findById(roleID).get();
-		user.getRole().add(role);
+		user.getRoles().add(role);
 
 //		user.setRole(role);
 		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-		return mapper.map(userRepo.save(user), UserDto.class);
+		return mapper.map(userRepository.save(user), UserDto.class);
 
 	}
 
 	@Override
 	public boolean checkEmail(String email) {
 		// TODO Auto-generated method stub
-		return userRepo.existsByEmail(email);
+		return userRepository.existsByEmail(email);
 	}
 
+//	@Override
+//	public void removeUser(int id user) {
+//		// TODO Auto-generated method stub
+//		if (!user.getverify()) {
+//			userRepo.delete(mapper.map(user, User.class));
+//
+//		}
+//		System.out.println(user.getEmail());
+//	}
 	@Override
-	public void removeUser(UserDto user) {
+	public UserResponse removeUser(int id) {
 		// TODO Auto-generated method stub
-		if (!user.getverify()) {
-			userRepo.delete(mapper.map(user, User.class));
+		UserResponse res = new UserResponse();
+		try {
+			Optional<User> user = userRepository.getById(id);
+			List<UserDto> lst = new ArrayList<>();
 
+			res.setUsers(lst);
+			if (user != null) {
+				userRepository.delete(mapper.map(user, User.class));
+				lst.add(mapper.map(user, UserDto.class));
+				return res;
+			} else {
+				return res;
+			}
+
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println("Error while removing user");
+
+			return res;
 		}
-		System.out.println(user.getEmail());
+
 	}
 
 	@Override
 	public void setOtp(String otp, String mail) {
 //		Update user with otp
-		int userId = userRepo.getByEmail(mail).get().getId();
-		User u = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
+		Long userId = userRepository.getByEmail(mail).get().getId();
+		User u = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
 		u.setOtpverify(otp);
 		u.setVerify(false);
-		this.userRepo.save(u);
+		this.userRepository.save(u);
 	}
 
 	@Override
@@ -136,17 +169,17 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void updatePassword(String mail, String password) {
 //		Update user with otp
-		int userId = userRepo.getByEmail(mail).get().getId();
-		User u = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
+		Long userId = userRepository.getByEmail(mail).get().getId();
+		User u = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
 		u.setVerify(true);
 		u.setPassword(bCryptPasswordEncoder.encode(password));
-		this.userRepo.save(u);
+		this.userRepository.save(u);
 	}
 
 	@Override
 	public UserResponse getAllUsers() {
 		// TODO Auto-generated method stub
-		List<User> us = userRepo.getAllUser();
+		List<User> us = userRepository.getAllUser();
 		UserResponse res = new UserResponse();
 		List<UserDto> data = us.stream().map((e) -> mapper.map(e, UserDto.class)).collect(Collectors.toList());
 		System.out.println(us);
@@ -157,10 +190,48 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDto getUsers(int id) {
 		// TODO Auto-generated method stub
-		Optional<User> us = userRepo.getById(id);
+		Optional<User> us = userRepository.getById(id);
 		UserDto ud = mapper.map(us, UserDto.class);
 		System.out.println(us);
-		return ud ;
+		return ud;
+	}
+
+	@Override
+	public String updateUser(Long id, UserUpdateRequest userUpdate) {
+		// TODO Auto-generated method stub
+		System.out.println("Running Imp");
+		try {
+
+			User user = userRepository.getReferenceById(id);
+			if (user.getEmail().matches(userUpdate.getEmail())) {
+				System.out.println("GetUser" + ":" + user.getEmail() + " : " + userUpdate.getEmail());
+				user.setUsername(userUpdate.getName());
+				user.setAddress(userUpdate.getAddress());
+				user.setPhone(userUpdate.getPhone());
+				user.setActive(userUpdate.isActive());
+				user.setVerify(userUpdate.isVerify());
+				System.out.println("Details Set");
+				user.getRoles().clear();
+				user.getRoles().add(roleRepository.getReferenceById(userUpdate.getRole().iterator().next().getId()));
+//				Set<Role> rl = userUpdate.getRole();
+//				Iterator<Role> it = rl.iterator();
+//				while (it.hasNext()) {
+//					Role r = it.next();
+//					Role role = roleRepository.getReferenceById(r.getId());
+//					user.getRole().clear();
+//					user.getRole().add(role);
+//				}
+				System.out.println("Role Set");
+				userRepository.save(user);
+				return "Update Successful";
+			} else {
+				return "Email id do not Match";
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println("Error Occur :" + e);
+			return "Error Occured";
+		}
 	}
 
 //	@Override

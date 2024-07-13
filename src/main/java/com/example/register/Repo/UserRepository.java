@@ -16,30 +16,36 @@ import com.example.register.Payload.UserResponse;
 
 //@EnableJpaRepositories
 @Repository
-public interface UserRepo extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Long> {
+
+	Optional<User> findByUsername(String username);
+
+	Boolean existsByUsername(String username);
+
+//	Optional<User> findByEmail(String email);
+//
+//	Boolean existsByEmail(String email);
 
 	public Optional<User> getByEmail(String email);
 
-	public  Optional<User> findByEmail(String email);
+	public Optional<User> findByEmail(String email);
 
 	public boolean existsByEmail(String email);
 
 	public boolean existsByPhone(String phone);
-	
+
 	public User getByotpverify(String otp);
-	
+
 	public boolean existsByotpverify(String otp);
 
-	
 //	@Query("select * from User u")
 //	@Query("SELECT u FROM User u")
 //	public List<User> findAll();
 	@Query("select u from User u")
-    public List<User> getAllUser();
+	public List<User> getAllUser();
 
-	public  Optional<User> getById(int id);
-	//	public UserDto save(UserDto userDto);
-
+	public Optional<User> getById(int id);
+	// public UserDto save(UserDto userDto);
 
 //	@Query("select u from User u")
 //	@Query("UPDATE User u SET otpverify = s WHERE (email = mail)")

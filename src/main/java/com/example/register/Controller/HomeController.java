@@ -18,12 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.register.Dto.UserDto;
 import com.example.register.Entity.User;
 import com.example.register.Payload.PasswordChangeRequest;
-import com.example.register.Repo.UserRepo;
+import com.example.register.Repo.UserRepository;
 import com.example.register.Service.UserService;
 
 import ch.qos.logback.core.model.Model;
 
-@CrossOrigin
+
+
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/register")
 public class HomeController {
@@ -32,7 +34,7 @@ public class HomeController {
 	private UserService userService;
 
 	@Autowired
-	private UserRepo repo;
+	private UserRepository repo;
 
 	@Autowired
 	private ModelMapper mapper;
@@ -75,7 +77,7 @@ public class HomeController {
 							.body("User registered Suscessfully check Mail to verify");
 				} else {
 					System.out.println("Removing Registered Data");
-					userService.removeUser(user);
+					userService.removeUser(user.getId());
 					return ResponseEntity.status(HttpStatus.CONFLICT).body("User registered UnSuscessfully");
 
 				}
