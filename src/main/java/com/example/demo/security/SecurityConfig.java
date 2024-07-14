@@ -92,4 +92,18 @@ public class SecurityConfig {
 
 		return http.build();
 	}
+	
+	
+	
+//	http.csrf((csrf) -> csrf.disable()).cors((cors) -> cors.disable())
+//	.authorizeHttpRequests((auth) -> auth.requestMatchers(PUBLIC_URL).permitAll()
+//			.requestMatchers(PRIVATE_URL).permitAll())
+//	.logout((logout) -> logout.logoutUrl("/logout").permitAll().clearAuthentication(true)
+//			.invalidateHttpSession(true))
+//	.exceptionHandling((ex) -> ex.authenticationEntryPoint(entryPoint))
+//	.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+//
+//http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+//
+//return http.build();
 }
