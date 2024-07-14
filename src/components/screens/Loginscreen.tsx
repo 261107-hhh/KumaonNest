@@ -56,7 +56,7 @@ const Loginscreen = () => {
         <View style={{ alignSelf: 'center', marginTop: 10 }}>
           <Text style={{ color: '#83683C', fontSize: 25, fontWeight: 'bold', flexWrap: 'wrap-reverse', letterSpacing: 3, // Increase this value to stretch the text
     lineHeight: 30, }}>
-            KUMAUN NEST
+            KUMAUN NESssssssT
           </Text>
           <Text style={{ color: '#83683C', fontStyle: 'italic', fontSize: 15, fontWeight: '700', paddingTop: 5 }}>
             The abode of Himalayan Products
