@@ -6,6 +6,7 @@ import com.example.register.Payload.UserResponse;
 import com.example.register.Payload.UserUpdateRequest;
 import com.example.register.Payload.request.SignupRequest;
 
+
 public interface UserService {
 
 	User createUser(SignupRequest userDto);
