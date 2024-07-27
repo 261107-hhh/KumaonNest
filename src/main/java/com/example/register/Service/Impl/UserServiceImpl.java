@@ -65,8 +65,8 @@ public class UserServiceImpl implements UserService {
 
 		String email = signUpRequest.getEmail();
 
-		User user = mapper.map(new SignupRequest(signUpRequest.getUsername(), signUpRequest.getEmail(),
-				encoder.encode(signUpRequest.getPassword()), signUpRequest.getPhone()), User.class);
+		User user = mapper.map(new SignupRequest(signUpRequest.getEmail(),
+				encoder.encode(signUpRequest.getPassword()),signUpRequest.getUsername(),  signUpRequest.getPhone()), User.class);
 
 		Set<Role> roles = new HashSet<>();
 		logger.info("WOrking Sign Up");
