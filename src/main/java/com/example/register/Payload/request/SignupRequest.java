@@ -12,7 +12,7 @@ public class SignupRequest {
 	@NotBlank
 	@Size(min = 8, max = 50)
 	private String password;
-	
+
 	private String username;
 
 	private String phone;
@@ -57,7 +57,7 @@ public class SignupRequest {
 		this.username = username;
 		this.phone = phone;
 	}
-	
-	
+
+
 
 }

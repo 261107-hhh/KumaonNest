@@ -22,7 +22,6 @@ import com.example.register.Dto.UserDto;
 import com.example.register.Entity.Role;
 import com.example.register.Payload.UserResponse;
 import com.example.register.Payload.UserUpdateRequest;
-import com.example.register.Payload.response.JwtResponse;
 import com.example.register.Repo.RoleRepository;
 import com.example.register.Repo.UserRepository;
 import com.example.register.Security.JwtUtils;
@@ -61,7 +60,7 @@ public class HomeController {
 		System.out.println(p.getName() + " this is current user");
 //		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles));
 		return ResponseEntity.ok().body(p.getName());
-		 
+
 	}
 
 	@GetMapping("/get-all-users")
@@ -69,8 +68,8 @@ public class HomeController {
 	private ResponseEntity<UserResponse>getAllUser() {
 		System.out.println(" this is all user");
 		UserResponse u1 = userService.getAllUsers();
-		System.out.println(u1);	
-		return new ResponseEntity<UserResponse>(u1,HttpStatus.ACCEPTED);
+		System.out.println(u1);
+		return new ResponseEntity<>(u1,HttpStatus.ACCEPTED);
 	}
 
 	@GetMapping("/get-user/{email}")
@@ -79,7 +78,7 @@ public class HomeController {
 		System.out.println(" this is get user");
 		UserDto u1 = userService.getUsers(email);
 		System.out.println(u1);
-		return new ResponseEntity<UserDto>(u1, HttpStatus.OK);
+		return new ResponseEntity<>(u1, HttpStatus.OK);
 	}
 
 	@PutMapping("/update-user/{email}")
