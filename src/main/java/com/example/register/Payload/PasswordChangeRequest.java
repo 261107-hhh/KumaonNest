@@ -1,11 +1,11 @@
 package com.example.register.Payload;
 
 public class PasswordChangeRequest {
-	
+
 	private String email;
 	private String password;
 	private String otp;
-	
+
 	public PasswordChangeRequest() {
 		super();
 	}
@@ -40,7 +40,7 @@ public class PasswordChangeRequest {
 	public void setOtp(String otp) {
 		this.otp = otp;
 	}
-	
-	
-	
+
+
+
 }

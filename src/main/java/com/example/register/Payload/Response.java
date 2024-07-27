@@ -3,12 +3,12 @@ package com.example.register.Payload;
 import com.example.register.Dto.UserDto;
 
 public class Response {
-	
+
 	private UserDto user;
 	private String token;
 	private String message = "Success";
-	
-	
+
+
 	public Response() {
 		super();
 	}
@@ -43,6 +43,6 @@ public class Response {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
-	
+
+
 }

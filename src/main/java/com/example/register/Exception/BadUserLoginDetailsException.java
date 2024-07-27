@@ -12,5 +12,5 @@ public class BadUserLoginDetailsException extends RuntimeException{
 		// TODO Auto-generated constructor stub
 	}
 
-	
+
 }

@@ -30,20 +30,21 @@ public class User implements UserDetails, Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	private String username;
 
 	@NotBlank
 	@Size(max = 50)
 	@Email(message = "Email should be valid")
+	@Column(unique = true)
 	private String email;
 
 	@NotBlank
 	@Size(min = 8, max = 225)
 	private String password;
 
-	@Size(min = 10, max = 10, message = "Can 3not be duplicate")
-	@Column(unique = true)
+	@Size(min = 10, max = 10)
+	@Column(unique = false)
 	private String phone;
 
 	@Column
@@ -62,7 +63,7 @@ public class User implements UserDetails, Serializable {
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> role = new HashSet<>();
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -71,6 +72,7 @@ public class User implements UserDetails, Serializable {
 		this.id = id;
 	}
 
+	@Override
 	public String getUsername() {
 		return username;
 	}
@@ -87,6 +89,7 @@ public class User implements UserDetails, Serializable {
 		this.email = email;
 	}
 
+	@Override
 	public String getPassword() {
 		return password;
 	}

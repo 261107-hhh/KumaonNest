@@ -1,15 +1,15 @@
 package com.example.register.Service.Impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailSendException;
@@ -17,14 +17,16 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
+import com.example.register.Controller.AuthController;
+import com.example.register.Dto.UserDto;
+import com.example.register.Entity.ERole;
+import com.example.register.Entity.Role;
+import com.example.register.Entity.User;
 import com.example.register.Exception.ResourceNotFoundException;
 import com.example.register.Payload.UserResponse;
 import com.example.register.Payload.UserUpdateRequest;
-import com.example.register.Dto.UserDto;
-import com.example.register.Entity.Role;
-import com.example.register.Entity.User;
+import com.example.register.Payload.request.SignupRequest;
 import com.example.register.Repo.RoleRepository;
 import com.example.register.Repo.UserRepository;
 import com.example.register.Service.UserService;
@@ -34,8 +36,13 @@ import jakarta.mail.internet.MimeMessage;
 @Service
 public class UserServiceImpl implements UserService {
 
-	@Value("${spring.mail.username}")
+	private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
+	@Value("${kumaonnest.app.mailer}")
 	private String fromEmail;
+
+	@Value("${kumaonnest.app.admin}")
+	private String admin;
 
 	@Autowired
 	private JavaMailSender javaMailSender;
@@ -44,7 +51,7 @@ public class UserServiceImpl implements UserService {
 	private UserRepository userRepository;
 
 	@Autowired
-	public BCryptPasswordEncoder bCryptPasswordEncoder;
+	public BCryptPasswordEncoder encoder;
 
 	@Autowired
 	private ModelMapper mapper;
@@ -53,23 +60,56 @@ public class UserServiceImpl implements UserService {
 	private RoleRepository roleRepository;
 
 	@Override
-	public UserDto createUser(UserDto userDto) {
+	public User createUser(SignupRequest signUpRequest) {
 		// TODO Auto-generated method stub
-		User user = mapper.map(userDto, User.class);
-		String mail = user.getEmail();
-		Long roleID = 3333l;
-//		&& userRepo.count() == 0
-		if ((mail.matches("kumaunretailstore@gmail.com") || mail.matches("himanshunainwal0@gmail.com"))) {
-			roleID = 1111l;
-		} else if (mail.contains("kumaunretailstore") || mail.contains("wal66")) {
-			roleID = 2222l;
-		}
-		Role role = this.roleRepository.findById(roleID).get();
-		user.getRoles().add(role);
 
-//		user.setRole(role);
-		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-		return mapper.map(userRepository.save(user), UserDto.class);
+		String email = signUpRequest.getEmail();
+
+		User user = mapper.map(new SignupRequest(signUpRequest.getUsername(), signUpRequest.getEmail(),
+				encoder.encode(signUpRequest.getPassword()), signUpRequest.getPhone()), User.class);
+
+		Set<Role> roles = new HashSet<>();
+		logger.info("WOrking Sign Up");
+
+		System.out.println(admin + ": THis is amdin: " + email);
+		if (admin.equals(email)) {
+			System.out.println(admin + ": THis is amdin111: " + email);
+
+			Role userRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+					.orElseThrow(() -> new RuntimeException("Error: Role is not found. 4"));
+			roles.add(userRole);
+		} else if (email.matches("himanshunainwal0@gmail.com")) {
+			Role userRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+					.orElseThrow(() -> new RuntimeException("Error: Role is not found. 3"));
+			roles.add(userRole);
+		} else if (email.matches("@kumaonnest.com") || email.matches("pankukweera5@gmail.com")
+				|| email.matches("dhruvkweera77@gmail.com")) {
+			Role userRole = roleRepository.findByName(ERole.ROLE_STAFF)
+					.orElseThrow(() -> new RuntimeException("Error: Role is not found. 2"));
+			roles.add(userRole);
+		} else {
+			Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+					.orElseThrow(() -> new RuntimeException("Error: Role is not found. 1"));
+			roles.add(userRole);
+		}
+
+		user.setRoles(roles);
+		return userRepository.save(user);
+//
+//		String mail = user.getEmail();
+//		Long roleID = 3333l;
+////		&& userRepo.count() == 0
+//		if ((mail.matches("kumaunretailstore@gmail.com") || mail.matches("himanshunainwal0@gmail.com"))) {
+//			roleID = 1111l;
+//		} else if (mail.contains("kumaunretailstore") || mail.contains("wal66")) {
+//			roleID = 2222l;
+//		}
+//		Role role = this.roleRepository.findById(roleID).get();
+//		user.getRoles().add(role);
+//
+////		user.setRole(role);
+//		user.setPassword(encoder.encode(user.getPassword()));
+//		return mapper.map(userRepository.save(user), UserDto.class);
 
 	}
 
@@ -89,11 +129,11 @@ public class UserServiceImpl implements UserService {
 //		System.out.println(user.getEmail());
 //	}
 	@Override
-	public UserResponse removeUser(int id) {
+	public UserResponse removeUser(Long id) {
 		// TODO Auto-generated method stub
 		UserResponse res = new UserResponse();
 		try {
-			Optional<User> user = userRepository.getById(id);
+			Optional<User> user = userRepository.findById(id);
 			List<UserDto> lst = new ArrayList<>();
 
 			res.setUsers(lst);
@@ -172,7 +212,7 @@ public class UserServiceImpl implements UserService {
 		Long userId = userRepository.getByEmail(mail).get().getId();
 		User u = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
 		u.setVerify(true);
-		u.setPassword(bCryptPasswordEncoder.encode(password));
+		u.setPassword(encoder.encode(password));
 		this.userRepository.save(u);
 	}
 
@@ -188,9 +228,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public UserDto getUsers(int id) {
+	public UserDto getUsers(String email) {
 		// TODO Auto-generated method stub
-		Optional<User> us = userRepository.getById(id);
+		Optional<User> us = userRepository.getByEmail(email);
 		UserDto ud = mapper.map(us, UserDto.class);
 		System.out.println(us);
 		return ud;
@@ -235,12 +275,18 @@ public class UserServiceImpl implements UserService {
 	}
 
 //	@Override
+//	public UserDto getUsers(int id) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+
+//	@Override
 //	public String addUser(UserDto userDto) {
 //		// TODO Auto-generated method stub
-//		
+//
 ////		User u = repo.getByEmail(userDto.getEmail())
 ////				()->new ResourceNotFoundException("User not found by this Email"));
-//		
+//
 //		User user = repo.getByEmail(userDto.getEmail());
 ////		.orElseThrow(()->new ResourceNotFoundException("User not found by this id"));
 ////		if(user) {
@@ -250,14 +296,14 @@ public class UserServiceImpl implements UserService {
 //		repo.save(user1);
 //		return user.getName();
 //	}
-//	
+//
 //	@Override
 //	public void validateOtp(int otp) {
 //		// TODO Auto-generated method stub
-//		
+//
 ////		User u = repo.getByEmail(userDto.getEmail())
 ////				()->new ResourceNotFoundException("User not found by this Email"));
-//		
+//
 ////		User user = repo.getByEmail(userDto.getEmail());
 ////		.orElseThrow(()->new ResourceNotFoundException("User not found by this id"));
 ////		if(user) {
@@ -267,12 +313,12 @@ public class UserServiceImpl implements UserService {
 ////		repo.save(user1);
 ////		return user.getName();
 //	}
-//	
-//	
+//
+//
 //
 ////	public void sendMail(String to, int otp) {
 ////		GEmailsender mailsender = new GEmailsender();
-////		
+////
 ////		String msg = "This is to verify mail " + otp + " is your OTP";
 ////		String subject = "OTP verification";
 ////		String from = "kumaunretailstore@gmail.com";

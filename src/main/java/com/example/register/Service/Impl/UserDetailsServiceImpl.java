@@ -14,7 +14,7 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-	
+
   @Autowired
   UserRepository userRepository;
 
@@ -26,7 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     return UserDetailsImpl.build(user);
   }
- 
+
 //	@Override
 //	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 //		// Load user From database
@@ -34,6 +34,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 //		User findByEmail = this.userRepo.findByEmail(username).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
 //		return findByEmail;
 //	}
-	
+
 
 }

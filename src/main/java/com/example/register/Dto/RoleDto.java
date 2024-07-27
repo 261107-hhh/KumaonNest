@@ -1,7 +1,7 @@
 package com.example.register.Dto;
 
 public class RoleDto {
-	 
+
 		private int id;
 		private String name;
 		public int getId() {
@@ -25,6 +25,6 @@ public class RoleDto {
 			super();
 			// TODO Auto-generated constructor stub
 		}
-		
+
 
 }

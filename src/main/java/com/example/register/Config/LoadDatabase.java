@@ -29,7 +29,7 @@ public class LoadDatabase {
 		if (roleRepository.findByName(ERole.ROLE_USER).isEmpty()) {
 			roleRepository.save(new Role(ERole.ROLE_USER));
 		}
-		
+
 		if (roleRepository.findByName(ERole.ROLE_STAFF).isEmpty()) {
 			roleRepository.save(new Role(ERole.ROLE_STAFF));
 		}

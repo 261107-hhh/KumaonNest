@@ -1,10 +1,8 @@
 package com.example.register.Service.Impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -47,8 +45,8 @@ public class UserDetailsImpl implements UserDetails {
 
 		return authorities;
 	}
-	
-	
+
+
 
 	public Long getId() {
 		return id;
@@ -87,13 +85,15 @@ public class UserDetailsImpl implements UserDetails {
 	public boolean isEnabled() {
 		return true;
 	}
-	
+
 	 @Override
 	  public boolean equals(Object o) {
-	    if (this == o)
-	      return true;
-	    if (o == null || getClass() != o.getClass())
-	      return false;
+	    if (this == o) {
+			return true;
+		}
+	    if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 	    UserDetailsImpl user = (UserDetailsImpl) o;
 	    return Objects.equals(id, user.id);
 	  }

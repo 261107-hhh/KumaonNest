@@ -1,178 +1,162 @@
 package com.example.register.Controller;
 
-import java.util.Optional;
+import java.security.Principal;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.register.Dto.UserDto;
-import com.example.register.Entity.User;
-import com.example.register.Payload.PasswordChangeRequest;
+import com.example.register.Entity.Role;
+import com.example.register.Payload.UserResponse;
+import com.example.register.Payload.UserUpdateRequest;
+import com.example.register.Payload.response.JwtResponse;
+import com.example.register.Repo.RoleRepository;
 import com.example.register.Repo.UserRepository;
-import com.example.register.Service.UserService;
-
-import ch.qos.logback.core.model.Model;
-
-
+import com.example.register.Security.JwtUtils;
+import com.example.register.Service.Impl.UserDetailsServiceImpl;
+import com.example.register.Service.Impl.UserServiceImpl;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/register")
+@RequestMapping("/user")
 public class HomeController {
 
 	@Autowired
-	private UserService userService;
+	private AuthenticationManager manager;
 
 	@Autowired
-	private UserRepository repo;
+	private UserDetailsServiceImpl userDetailsServiceImpl;
+
+	@Autowired
+	private UserServiceImpl userService;
+
+	@Autowired
+	private JwtUtils jwtUtils;
 
 	@Autowired
 	private ModelMapper mapper;
+//
+	@Autowired
+	private UserRepository userRepository;
 
-	@PostMapping("/createUser")
-	public ResponseEntity<String> registerUserTemp(@RequestBody UserDto userDto) {
+	@Autowired
+	private RoleRepository roleRepository;
 
-		userDto.setEmail(userDto.getEmail().trim());
-		userDto.setPassword(userDto.getPassword().trim());
-		userDto.setName(userDto.getName().trim());
-		userDto.setPhone(userDto.getPhone().trim());
+	@GetMapping("/current-user")
+	@PreAuthorize("hasRole('USER') or hasRole('STAFF') or hasRole('MODERATOR') or hasRole('ADMIN')")
+	private ResponseEntity<?> currentUser(Principal p) {
+		System.out.println(p.getName() + " this is current user");
+//		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), roles));
+		return ResponseEntity.ok().body(p.getName());
+		 
+	}
 
-		System.out.println("Register user: " + userDto);
+	@GetMapping("/get-all-users")
+	@PreAuthorize("hasRole('ADMIN')")
+	private ResponseEntity<UserResponse>getAllUser() {
+		System.out.println(" this is all user");
+		UserResponse u1 = userService.getAllUsers();
+		System.out.println(u1);	
+		return new ResponseEntity<UserResponse>(u1,HttpStatus.ACCEPTED);
+	}
 
-		// Validate the input data
-		if (userDto.getName() == null || userDto.getEmail() == null || userDto.getPassword() == null
-				|| userDto.getPhone() == null || userDto.getPhone().equals("0000000000")) {
-			System.out.println("Not Valid Data");
-			return ResponseEntity.badRequest().body("Invalid input data");
+	@GetMapping("/get-user/{email}")
+	@PreAuthorize("hasRole('USER') or hasRole('STAFF') or hasRole('MODERATOR') or hasRole('ADMIN')")
+	private ResponseEntity<UserDto> getUser(@PathVariable String email) {
+		System.out.println(" this is get user");
+		UserDto u1 = userService.getUsers(email);
+		System.out.println(u1);
+		return new ResponseEntity<UserDto>(u1, HttpStatus.OK);
+	}
 
+	@PutMapping("/update-user/{email}")
+	@PreAuthorize("hasRole('USER') or hasRole('STAFF') or hasRole('MODERATOR') or hasRole('ADMIN')")
+	private ResponseEntity<?> updateUser(@PathVariable String email, @RequestBody UserUpdateRequest userUpdate) {
+		System.out.println(" this is update user: " + userUpdate.getName() + ":" + userUpdate.getRole());
+		UserDto ud = new UserDto();
+//		System.out.println(roleRepo.getReferenceById(id)+" role");
+//		System.out.println(userRepo.getById(id).get().getRole()+" role");
+//		ud.setRole(userUpdate.getRole());
+		try {
+			Set<Role> s = userRepository.getByEmail(email).get().getRoles();
+			Iterator<Role> it = s.iterator();
+//
+//			while (it.hasNext()) {
+////				it.next().setId(2222);
+//				it.next().setId(2222);
+//				System.out.println("Update Role");
+////				System.out.println(it.next().getName()+" Name");
+////				System.out.println(it.next().getId() + " rrr");
+////				it.next().setName("ROLE_STAFF");
+////				it.next().setName("ASDD");
+//
+//			}
+
+		} catch (Exception e) {
+
+			// TODO: handle exception
+			System.out.println("Thrown by update: " + e);
 		}
+		try {
+			Set<Role> s1 = userRepository.getByEmail(email).get().getRoles();
+			Iterator<Role> it1 = s1.iterator();
 
-		// Check if the email already exists
-		else if (repo.existsByEmail(userDto.getEmail())) {
-			System.out.println("Email ALready Exist");
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists by similar Email!");
-		}
+			while (it1.hasNext()) {
+//				it.next().setId(2222);
+//				it1.next().setId(2222);
+//				System.out.println("Update Role");
+//				System.out.println(it1.next().getName()+" Name");
+				System.out.println(it1.next().getId() + " rrr");
+//				it.next().setName("ROLE_STAFF");
+//				System.out.println(it.next().getId() + " rrr");
+//				it.next().setName("ASDD");
 
-		// Check if the phone already exists
-		else if (repo.existsByPhone(userDto.getPhone())) {
-			System.out.println("Phone ALready Exist");
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("User already exists by similar Phone!");
-		} else {
-			UserDto user = userService.createUser(userDto);
-			if (user != null) {
-				boolean verify = sendMail(user.getEmail());
-				if (verify) {
-					System.out.println("Registered Success");
-					return ResponseEntity.status(HttpStatus.CREATED)
-							.body("User registered Suscessfully check Mail to verify");
-				} else {
-					System.out.println("Removing Registered Data");
-					userService.removeUser(user.getId());
-					return ResponseEntity.status(HttpStatus.CONFLICT).body("User registered UnSuscessfully");
-
-				}
 			}
 
-			else {
-				System.out.println("Server not working");
-				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-						.body("User registered UnSuscessfully try again later.");
+		} catch (Exception e) {
 
-			}
-
+			// TODO: handle exception
+			System.out.println("Thrown by update: " + e);
 		}
+//		Integer.parseInt(userUpdate.getRole())
+//		Set<Role> s1 = userRepo.getById(id).get().getRole();
+//		Iterator<Role> it1 = s1.iterator();
+//		while(it.hasNext()) {
+//			System.out.println(it1.next().getId()+" rrr");
+////			System.out.println(it1.next().getId()+" rrr");
+//		}
+
+//		UserDto u1 = userService.getUsers(id);
+//		System.out.println(u1);
+		return ResponseEntity.ok().body("Updateddd");
+//		return ResponseEntity.ok().body("Updateddd");
 	}
 
-	boolean sendMail(String mail) {
-		System.out.println("Hi there");
-		String otp = getAlphaNumericString(29);
-		String to = mail;
-		String subject = "Mail Verification";
-		String body = "T oversify the email register is verified personal only Otp paste it on" + "browser  " + otp;
-		boolean verify = userService.sendMail(to, subject, body);
-		userService.setOtp(otp, mail);
-		return verify;
+	@GetMapping("/logout")
+	@PreAuthorize("hasRole('USER') or hasRole('STAFF') or hasRole('MODERATOR') or hasRole('ADMIN')")
+	private String logout() {
+		return "LOgout called";
+//	private String logout(Principal p) {
+//		return p.getName();
+//		return "This is current";
+
+//import org.springframework.web.bind.annotation.GetMapping;
+//
+//import org.springframework.security.access.prepost.PreAuthorize;
+
 	}
-
-	static String getAlphaNumericString(int n) {
-
-		// choose a Character random from this String
-		String AlphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "0123456789" + "abcdefghijklmnopqrstuvxyz";
-
-		// create StringBuffer size of AlphaNumericString
-		StringBuilder sb = new StringBuilder(n);
-
-		for (int i = 0; i < n; i++) {
-
-			// generate a random number between
-			// 0 to AlphaNumericString variable length
-			int index = (int) (AlphaNumericString.length() * Math.random());
-
-			// add Character one by one in end of sb
-			sb.append(AlphaNumericString.charAt(index));
-		}
-
-		return sb.toString();
-	}
-
-	@GetMapping("/verify/{otp}")
-	public ResponseEntity<String> saveUserAfterOtpVerification(@PathVariable("otp") String otp) {
-		System.out.println(otp + " OTP IS");
-		if (repo.existsByotpverify(otp)) {
-			User user = repo.getByotpverify(otp);
-			user.setVerify(true);
-			user.setActive(true);
-			user.setOtpverify("verified");
-			repo.save(user);
-			System.out.println("Verified user");
-			return ResponseEntity.status(HttpStatus.CREATED)
-					.body("User Verified");
-		}
-		return ResponseEntity.status(HttpStatus.CONFLICT)
-				.body("Wrong OTP");
-	}
-
-	@GetMapping("/request/newotp/{mail}")
-	public ResponseEntity<String> newOtp(@PathVariable("mail") String mail) {
-		System.out.println(mail + " This is mail");
-		if (repo.existsByEmail(mail)) {
-			sendMail(mail);
-			return ResponseEntity.status(HttpStatus.CREATED)
-					.body("Check registered mail");
-		} else {
-			return ResponseEntity.status(HttpStatus.CONFLICT)
-					.body("No user found with mail id");
-		}
-	}
-	
-	@PostMapping("/request/newpassword")
-	public ResponseEntity<String> newOtp(@RequestBody PasswordChangeRequest req ) {
-		String mail = req.getEmail();
-		System.out.println(req.getEmail() + " This is mail");
-		if (repo.existsByEmail(mail)) {
-			Optional<User> user = repo.getByEmail(mail);
-			if(user.get().getOtpverify().equals(req.getOtp())) {
-				userService.updatePassword(mail, req.getPassword());
-				return ResponseEntity.status(HttpStatus.CREATED)
-						.body("New password has been set");
-			}
-			return ResponseEntity.status(HttpStatus.CONFLICT)
-					.body("Otp does not match");
-		} else {
-			return ResponseEntity.status(HttpStatus.CONFLICT)
-					.body("No user found with mail id");
-		}
-	}
-	
 
 }

@@ -1,16 +1,16 @@
 package com.example.register.Payload;
 
 public class ApiResponse {
-	
+
 	private String message;
 	private boolean success;
-	
+
 	public ApiResponse(String message, boolean success) {
 		super();
 		this.message = message;
 		this.success = success;
 	}
-	
+
 	public ApiResponse() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -27,6 +27,6 @@ public class ApiResponse {
 	public void setSuccess(boolean success) {
 		this.success = success;
 	}
-	
+
 
 }
