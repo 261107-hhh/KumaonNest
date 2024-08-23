@@ -1,12 +1,14 @@
 package com.example.register.Config;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -17,7 +19,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-
 @Component
 public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 
@@ -26,23 +27,51 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException authException) throws IOException, ServletException {
-		System.out.println("HAHAHAHHAHAH");
-		logger.error("Unauthorized error: {}", authException.getMessage());
+		if (authException instanceof InsufficientAuthenticationException) {
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			final Map<String, Object> body = new HashMap<>();
+			body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+			body.put("error", "Unauthorized");
+			body.put("message", authException.getMessage());
+			body.put("path", request.getServletPath());
+			final ObjectMapper mapper = new ObjectMapper();
+			mapper.writeValue(response.getOutputStream(), body);
+		} else {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-		final Map<String, Object> body = new HashMap<>();
-
-		body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-		body.put("error", "Unauthorized");
-		body.put("message", authException.getMessage());
-		body.put("path", request.getServletPath());
-		final ObjectMapper mapper = new ObjectMapper();
-		mapper.writeValue(response.getOutputStream(), body);
+			final Map<String, Object> body = new HashMap<>();
+			body.put("status", HttpServletResponse.SC_NOT_FOUND);
+			body.put("error", "Not Found");
+			body.put("message", "The requested resource was not found");
+			body.put("path", request.getServletPath());
+			final ObjectMapper mapper = new ObjectMapper();
+			mapper.writeValue(response.getOutputStream(), body);
+		}
 	}
-
 }
+//	@Override
+//	public void commence(HttpServletRequest request, HttpServletResponse response,
+//			AuthenticationException authException) throws IOException, ServletException {
+//		System.out.println("HAHAHAHHAHAH");
+//		logger.error("Unauthorized error: {}", authException.getMessage());
+//
+//		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+//		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+//
+//		final Map<String, Object> body = new HashMap<>();
+//
+//		body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+//		body.put("error", "Unauthorized");
+//		body.put("message", authException.getMessage());
+//		body.put("path", request.getServletPath());
+//		final ObjectMapper mapper = new ObjectMapper();
+//		mapper.writeValue(response.getOutputStream(), body);
+//	}
+//
+//}
 
 //package com.example.register.Config;
 //

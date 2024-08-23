@@ -157,5 +157,11 @@ public class HomeController {
 //import org.springframework.security.access.prepost.PreAuthorize;
 
 	}
+	
+	@GetMapping("/check")
+	public ResponseEntity<?>check(){
+		System.out.println("RUNNING CHECK");
+		return ResponseEntity.status(HttpStatus.OK).body("msg COnnected");
+	}
 
 }

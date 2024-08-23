@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -145,13 +146,13 @@ public class AuthController {
 			} else {
 				System.out.println("Removing Registered Data");
 				userService.removeUser(user.getId());
-				return ResponseEntity.status(HttpStatus.CONFLICT).body("User registered UnSuscessfully!");
+				return ResponseEntity.status(HttpStatus.CONFLICT).body("User registeration UnSuscessfully!");
 
 			}
 		} else {
 			System.out.println("Server not working");
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("User registered UnSuscessfully try again later!");
+					.body("User registeration UnSuscessfully try again later!");
 
 		}
 //		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
@@ -236,6 +237,12 @@ public class AuthController {
 		} else {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("No user found with mail id");
 		}
+	}
+	
+	@GetMapping("/check")
+	public ResponseEntity<?>check(){
+		System.out.println("RUNNING CHECK");
+		return ResponseEntity.status(HttpStatus.OK).body("msg COnnected");
 	}
 
 }

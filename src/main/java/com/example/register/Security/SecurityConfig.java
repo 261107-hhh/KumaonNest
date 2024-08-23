@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.example.register.Config.AuthEntryPointJwt;
@@ -29,17 +30,6 @@ public class SecurityConfig {
 	@Autowired
 	AuthTokenFilter authTokenFilter;
 
-//	@Bean
-//	public AuthTokenFilter authenticationJwtTokenFilter() {
-//		return new AuthTokenFilter();
-//	}
-
-	// @Override
-	// public void configure(AuthenticationManagerBuilder
-	// authenticationManagerBuilder) throws Exception {
-//	    authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-	// }
-
 	@Bean
 	public DaoAuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -50,48 +40,41 @@ public class SecurityConfig {
 		return authProvider;
 	}
 
-	// @Bean
-	// @Override
-	// public AuthenticationManager authenticationManagerBean() throws Exception {
-//	    return super.authenticationManagerBean();
-	// }
-
 	@Bean
 	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
 		return authConfig.getAuthenticationManager();
 	}
-
-//	@Bean
-//	public PasswordEncoder passwordEncoder() {
-//		return new BCryptPasswordEncoder();
-//	}
 
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
-	// @Override
-	// protected void configure(HttpSecurity http) throws Exception {
-//	    http.cors().and().csrf().disable()
-//	      .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-//	      .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-//	      .authorizeRequests().antMatchers("/api/auth/**").permitAll()
-//	      .antMatchers("/api/test/**").permitAll()
-//	      .anyRequest().authenticated();
-	//
-//	    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-	// }
+//	@Bean
+//	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//		System.out.println("HAHAHAHHAHAH111");
+//		http.csrf(csrf -> csrf.disable())
+//				.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+//				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//				.authorizeHttpRequests(
+//						auth -> auth.requestMatchers("/api/auth/**").permitAll()
+//						.anyRequest().authenticated());
+//
+//		http.authenticationProvider(authenticationProvider());
+//
+//		http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
+//
+//		return http.build();
+//	}
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		System.out.println("HAHAHAHHAHAH111");
 		http.csrf(csrf -> csrf.disable())
-				.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+				.exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler)
+						.accessDeniedHandler(accessDeniedHandler()))
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(
-						auth -> auth.requestMatchers("/api/auth/**").permitAll()
-						.anyRequest().authenticated());
+						auth -> auth.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated());
 
 		http.authenticationProvider(authenticationProvider());
 
@@ -100,17 +83,10 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-//	http.csrf((csrf) -> csrf.disable()).cors((cors) -> cors.disable())
-//	.authorizeHttpRequests((auth) -> auth.requestMatchers(PUBLIC_URL).permitAll()
-//			.requestMatchers(PRIVATE_URL).permitAll())
-//	.logout((logout) -> logout.logoutUrl("/logout").permitAll().clearAuthentication(true)
-//			.invalidateHttpSession(true))
-//	.exceptionHandling((ex) -> ex.authenticationEntryPoint(entryPoint))
-//	.sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-//
-//http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
-//
-//return http.build();
+	@Bean
+	public AccessDeniedHandler accessDeniedHandler() {
+		return new CustomAccessDeniedHandler();
+	}
 
 }
 
